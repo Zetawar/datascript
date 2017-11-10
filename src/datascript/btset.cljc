@@ -33,15 +33,17 @@
   datascript.btset
   (:refer-clojure :exclude [iter])
   (:require
-    [datascript.arrays :as da])
+    [datascript.arrays :as da]
+    #?(:clj [net.cgrand.macrovich :as macros]))
   #?(:clj  (:import [java.util Arrays]))
-  #?(:cljs (:require-macros [datascript.btset :refer [half not==]])))
+  #?(:cljs (:require-macros [datascript.btset :refer [half not==]]
+                            [net.cgrand.macrovich :as macros])))
 
-#?(:clj
+(macros/deftime
   (defmacro half [x]
     `(unsigned-bit-shift-right ~x 1)))
 
-#?(:clj
+(macros/deftime
   (defmacro not== [x y]
     `(not (== ~x ~y))))
 

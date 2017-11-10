@@ -1,4 +1,4 @@
-(defproject datascript "0.16.2"
+(defproject datascript "0.16.3-SNAPSHOT"
   :description "An implementation of Datomic in-memory database and Datalog query engine in ClojureScript"
   :license {:name "Eclipse"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -7,6 +7,7 @@
   :dependencies [
     [org.clojure/clojure "1.7.0" :scope "provided"]
     [org.clojure/clojurescript "1.7.228" :scope "provided"]
+    [net.cgrand/macrovich "0.2.0"]
   ]
   
   :plugins [
@@ -75,9 +76,11 @@
 
   :profiles {
     :1.8 { :dependencies [[org.clojure/clojure       "1.8.0" :scope "provided"]
-                          [org.clojure/clojurescript "1.8.51" :scope "provided"]] }
+                          [org.clojure/clojurescript "1.8.51" :scope "provided"]
+                          [net.cgrand/macrovich      "0.2.0"]] }
     :1.9 { :dependencies [[org.clojure/clojure       "1.9.0-alpha17" :scope "provided"]
-                          [org.clojure/clojurescript "1.9.671" :scope "provided"]]
+                          [org.clojure/clojurescript "1.9.671" :scope "provided"]
+                          [net.cgrand/macrovich      "0.2.0"]]
            ;; because we use printer in tests, and earlier versions don’t support it
            :global-vars  { *print-namespace-maps* false }}
     :dev { :source-paths ["bench/src" "test" "dev"]

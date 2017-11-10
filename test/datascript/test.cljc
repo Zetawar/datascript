@@ -3,7 +3,7 @@
     #?(:cljs [cljs.test    :as t :refer-macros [is are deftest testing]]
        :clj  [clojure.test :as t :refer        [is are deftest testing]])
     datascript.test.core
-   
+
     datascript.test.btset
     datascript.test.components
     datascript.test.conn

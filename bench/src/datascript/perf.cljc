@@ -1,18 +1,23 @@
 (ns datascript.perf
   (:require
     [clojure.string :as str]
-    #?(:clj clojure.java.shell))
-  #?(:cljs (:require-macros datascript.perf)))
+    #?(:clj clojure.java.shell)
+    #?(:clj [net.cgrand.macrovich :as macros]))
+  #?(:cljs (:require-macros datascript.perf
+                            [net.cgrand.macrovich :as macros])))
 
 (def ^:const   enabled? true)
 (def ^:dynamic debug?   false)
 
-#?(:clj
+(macros/deftime
   (defmacro context []
-    (when (and (System/getenv "BENCH_PROJECT")
-               (System/getenv "BENCH_BUILD"))
-      { :project (System/getenv "BENCH_PROJECT")
-        :build   (System/getenv "BENCH_BUILD") })))
+    (let [bench-project #?(:clj  (system/getenv "BENCH_PROJECT")
+                           :cljs js/process.env.BENCH_PROJECT)
+          bench-build #?(:clj  (system/getenv "BENCH_BUILD")
+                         :cljs js/process.env.BENCH_BUILD)]
+      (when (and bench-project bench-build)
+        { :project bench-project
+         :build   bench-build }))))
 
 (def ^:dynamic *context* (datascript.perf/context))
 
@@ -93,20 +98,20 @@
       (println-frame f 0))
     (vreset! current-frame p)))
 
-#?(:clj
+(macros/deftime
   (defmacro when-debug [& body]
     (when enabled?
       `(when debug?
          ~@body))))
 
-#?(:clj
+(macros/deftime
   (defmacro debug [& msgs]
     (when enabled?
       `(when debug?
          (start-frame false)
          (end-frame ~@msgs)))))
 
-#?(:clj
+(macros/deftime
   (defmacro measure [body & msgs]
     (if enabled?
       (let [sym   (gensym)
@@ -127,7 +132,7 @@
       (recur))))
 
 
-#?(:clj
+(macros/deftime
    (defmacro with-debug [& body]
     `(binding [debug? true]
        (try
@@ -137,7 +142,7 @@
 
 ;; minibench
 
-#?(:clj
+(macros/deftime
   (defmacro dotime [duration & body]
    `(let [start-t# (now)
           end-t#   (+ ~duration start-t#)]
@@ -148,7 +153,7 @@
             (recur (+ *step* iterations#))
             (double (/ (- now# start-t#) iterations#))))))))
 
-#?(:clj
+(macros/deftime
   (defmacro minibench [spec & body]
    `(let [_#     (dotime *warmup-t* ~@body)
           avg-t# (dotime *bench-t* ~@body)]
@@ -167,7 +172,7 @@
     (map #(left-pad (str %) 10 " "))
     (apply println)))
 
-#?(:clj
+(macros/deftime
   (defmacro bench [spec & body]
    `(let [_#       (when-not *context* (println (str "\n" ~spec)))
           _#       (dotime *warmup-t* ~@body)

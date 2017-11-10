@@ -1,9 +1,12 @@
 (ns datascript.arrays
   (:require
-    [clojure.string :as str])
+    [clojure.string :as str]
+    #?(:clj [net.cgrand.macrovich :as macros]))
   (:refer-clojure :exclude [make-array into-array array amap aget aset alength array? aclone])
-  #?(:cljs (:require-macros datascript.arrays))
-  #?(:clj  (:import [java.util Arrays])))
+  #?(:cljs (:require-macros
+            [datascript.arrays]
+            [net.cgrand.macrovich :as macros]))
+  #?(:clj (:import [java.util Arrays])))
 
 (defn- if-cljs [env then else]
   (if (:ns env) then else))
@@ -19,26 +22,26 @@
            [aseq]
            (clojure.core/into-array java.lang.Object aseq)))
 
-#?(:clj
+(macros/deftime
   (defmacro aget [arr i]
     (if-cljs &env
       (list 'js* "(~{}[~{}])" arr i)
      `(clojure.lang.RT/aget ~(vary-meta arr assoc :tag "[[Ljava.lang.Object;") (int ~i)))))
 
-#?(:clj
+(macros/deftime
   (defmacro alength [arr]
     (if-cljs &env
       (-> (list 'js* "~{}.length" arr)
           (vary-meta assoc :tag 'number))
      `(clojure.lang.RT/alength ~(vary-meta arr assoc :tag "[[Ljava.lang.Object;")))))
 
-#?(:clj
+(macros/deftime
   (defmacro aset [arr i v]
     (if-cljs &env
       (list 'js* "(~{}[~{}] = ~{})" arr i v)
      `(clojure.lang.RT/aset ~(vary-meta arr assoc :tag "[[Ljava.lang.Object;") (int ~i) ~v))))
 
-#?(:clj
+(macros/deftime
   (defmacro array [& args]
     (if-cljs &env
       (->
@@ -51,7 +54,7 @@
             (doto ^{:tag "[[Ljava.lang.Object;"} arr#
             ~@(map #(list 'aset % (nth args %)) (range len)))))))))
 
-#?(:clj
+(macros/deftime
   (defmacro acopy [from from-start from-end to to-start]
     (if-cljs &env
      `(let [l# (- ~from-end ~from-start)]
